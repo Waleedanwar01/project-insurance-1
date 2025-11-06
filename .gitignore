@@ -1,0 +1,30 @@
+# Root gitignore to keep secrets and build artifacts out of Git
+
+# Env files (global)
+.env
+.env.*
+*.env
+*.env.*
+**/.env
+**/.env.*
+
+# Python/Django
+backend/.venv/
+backend/venv/
+backend/__pycache__/
+**/__pycache__/
+backend/db.sqlite3
+backend/staticfiles/
+backend/media/
+backend/*.log
+
+# Next.js/Node
+insurance/node_modules/
+insurance/.next/
+insurance/out/
+insurance/build/
+insurance/*.log
+
+# OS junk
+.DS_Store
+Thumbs.db
