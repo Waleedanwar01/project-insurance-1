@@ -10,24 +10,26 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 import os
-
 from pathlib import Path
-from decouple import config
-# Before the fix (likely):
-# from decouple import config
+import dj_database_url
+from decouple import config, Csv
+from dotenv import load_dotenv
+from urllib.parse import urlparse, parse_qsl
 
-# After the fix:
-from decouple import config, Csv  # <-- Add Csv here
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env if present
+load_dotenv()
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY')
-DEBUG = config('DEBUG', cast=bool)
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-temp-key')
+DEBUG = config('DEBUG', cast=bool, default=True)
+USE_SQLITE = config('USE_SQLITE', cast=bool, default=True)
 
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost', cast=Csv())
@@ -69,14 +71,14 @@ MIDDLEWARE = [
 
 
 # CORS - allow Next.js origins via environment (no hardcoded defaults)
-CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', cast=Csv())
+CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', cast=Csv(), default='http://localhost:3001')
 
 # In local DEBUG, allow all origins to simplify development
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 
 # CSRF trusted origins configurable via env to match CORS (no hardcoded defaults)
-CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', cast=Csv())
+CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', cast=Csv(), default='http://localhost:3001')
 
 ROOT_URLCONF = 'backend.urls'
 
@@ -99,18 +101,45 @@ TEMPLATES = [
 WSGI_APPLICATION = 'backend.wsgi.application'
 
 
+# Database (PostgreSQL via environment variables)
 # Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST'),
-        'PORT': config('DB_PORT'),
+# Switchable via USE_SQLITE env for easy local development
+# Default now False so Postgres is used unless explicitly set to True
+
+
+
+if USE_SQLITE:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    # Prefer explicit parsing to support Neon query options like channel_binding
+    db_url = os.getenv("DATABASE_URL", "")
+    if db_url:
+        tmpPostgres = urlparse(db_url)
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': tmpPostgres.path.replace('/', ''),
+                'USER': tmpPostgres.username,
+                'PASSWORD': tmpPostgres.password,
+                'HOST': tmpPostgres.hostname,
+                'PORT': tmpPostgres.port or 5432,
+                'OPTIONS': dict(parse_qsl(tmpPostgres.query)),
+            }
+        }
+    else:
+        # Fallback to dj_database_url for general Postgres URLs
+        DATABASES = {
+            'default': dj_database_url.config(
+                default=config('DATABASE_URL', default=''),
+                conn_max_age=600,
+                ssl_require=True,
+            )
+        }
 
 
 # Password validation
@@ -179,16 +208,27 @@ CKEDITOR_CONFIGS = {
     },
 }
 
-# Email & Site Configuration (environment-driven only)
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = config('EMAIL_HOST')
-EMAIL_PORT = config('EMAIL_PORT', cast=int)
-EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
-EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL')
-ADMIN_EMAIL = config('ADMIN_EMAIL')
+# Email & Site Configuration
+# Use console backend in DEBUG to avoid requiring SMTP env vars
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    EMAIL_HOST = ''
+    EMAIL_PORT = 1025
+    EMAIL_USE_TLS = False
+    EMAIL_HOST_USER = ''
+    EMAIL_HOST_PASSWORD = ''
+    DEFAULT_FROM_EMAIL = 'webmaster@localhost'
+    ADMIN_EMAIL = ''
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = config('EMAIL_HOST', default='')
+    EMAIL_PORT = config('EMAIL_PORT', cast=int, default=587)
+    EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool, default=True)
+    EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+    EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+    DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='webmaster@localhost')
+    ADMIN_EMAIL = config('ADMIN_EMAIL', default='')
 
 # Public site configuration
-SITE_URL = config('SITE_URL')
-SITE_NAME = config('SITE_NAME')
+SITE_URL = config('SITE_URL', default='http://localhost:8000')
+SITE_NAME = config('SITE_NAME', default='Insurance')

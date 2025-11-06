@@ -77,9 +77,9 @@ const BlogDetailClient = ({ params, backHref = '/blog', backLabel = 'Back to Blo
       const data = await res.json();
       setPost(data);
       
-      // Increment view count
+      // Increment view count (legacy path)
       try {
-        await fetch(`${API_BASE_URL}/api/blog/posts/${slug}/increment_view/`, {
+        await fetch(`${API_BASE_URL}/api/blog/posts/${slug}/increment-views/`, {
           method: 'POST',
         });
       } catch (viewError) {
