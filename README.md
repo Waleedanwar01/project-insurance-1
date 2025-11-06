@@ -2,6 +2,10 @@
 
 A full-stack web app with a Next.js frontend (`insurance/`) and a Django REST API backend (`backend/`). Uses PostgreSQL (recommended: Supabase) and is configured for fast performance and clean deployment.
 
+## Repository
+- GitHub: https://github.com/Waleedanwar01/project-insurance-1
+- Environment files are excluded via `.gitignore` and should not be committed.
+
 ## Overview
 - Frontend: Next.js App Router in `insurance/`
 - Backend: Django + DRF in `backend/`
@@ -23,6 +27,11 @@ A full-stack web app with a Next.js frontend (`insurance/`) and a Django REST AP
 - Run:
   - `cd backend`
   - `python manage.py migrate`
+  - (Optional) seed sample content:
+    - `python manage.py seed_blog`
+    - `python manage.py seed_companies`
+    - `python manage.py seed_faq`
+    - `python manage.py seed_static_pages`
   - `python manage.py runserver 8000`
 - API base (dev): `http://127.0.0.1:8000`
 - Key endpoints:
@@ -41,6 +50,14 @@ A full-stack web app with a Next.js frontend (`insurance/`) and a Django REST AP
   - `cd insurance`
   - `npm install`
   - `npm run dev` → `http://localhost:3000`
+
+### Quick Start
+In two terminals:
+- Terminal 1:
+  - `cd backend && python manage.py runserver 8000`
+- Terminal 2:
+  - `cd insurance && npm run dev`
+Ensure `NEXT_PUBLIC_API_BASE_URL` in `insurance/.env.local` points to the backend URL.
 
 ## Deployment
 
@@ -73,6 +90,9 @@ A full-stack web app with a Next.js frontend (`insurance/`) and a Django REST AP
 ## Security
 - Do not commit `.env` files. Use provider’s Environment Variables UI or a secrets manager.
 - Ensure `ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS`, and `CSRF_TRUSTED_ORIGINS` match production domains.
+
+## Changelog
+- 2025-11-06: Documentation updated; added repo link and seeding commands. Local and deployment instructions clarified.
 
 ## Troubleshooting
 - Backend unreachable from frontend (dev): verify `NEXT_PUBLIC_API_BASE_URL` and that Django is running on `http://127.0.0.1:8000`.
