@@ -1,6 +1,6 @@
 # Project Insurance
 
-A full-stack web app with a Next.js frontend (`insurance/`) and a Django REST API backend (`backend/`). Uses PostgreSQL (recommended: Supabase) and is configured for fast performance and clean deployment.
+A full-stack web app with a Next.js frontend (`insurance/`) and a Django REST API backend (`backend/`). Uses PostgreSQL (recommended: Neon) and is configured for fast performance and clean deployment.
 
 ## Repository
 - GitHub: https://github.com/Waleedanwar01/project-insurance-1
@@ -9,19 +9,19 @@ A full-stack web app with a Next.js frontend (`insurance/`) and a Django REST AP
 ## Overview
 - Frontend: Next.js App Router in `insurance/`
 - Backend: Django + DRF in `backend/`
-- Database: PostgreSQL (Supabase recommended)
+- Database: PostgreSQL (Neon recommended)
 - Media: Served by Django in development; consider CDN or object storage in production
 
 ## Getting Started (Local)
 
 ### Backend (Django)
-- Prerequisites: Python 3.11+, PostgreSQL (or Supabase connection)
+- Prerequisites: Python 3.11+, PostgreSQL (Neon connection via DATABASE_URL)
 - Copy env example and fill values:
   - `backend/.env.example` → `backend/.env`
 - Common environment variables:
   - `SECRET_KEY`, `DEBUG`, `ALLOWED_HOSTS`
   - `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT=5432`
-  - `DB_SSLMODE=require` (for Supabase)
+  - `DATABASE_URL` (Neon connection string, includes `sslmode=require`)
   - `SITE_URL`, `SITE_NAME`
   - `CORS_ALLOWED_ORIGINS`, `CSRF_TRUSTED_ORIGINS`
 - Run:
@@ -41,11 +41,10 @@ A full-stack web app with a Next.js frontend (`insurance/`) and a Django REST AP
 
 ### Frontend (Next.js)
 - Prerequisites: Node 18+
-- Copy env example and fill values:
-  - `insurance/.env.example` → `insurance/.env.local`
-- Required env:
-  - `NEXT_PUBLIC_API_BASE_URL` (point to backend URL)
-  - `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SITE_NAME`
+- Env optional: defaults are provided for local dev
+  - `NEXT_PUBLIC_API_BASE_URL` defaults to `http://127.0.0.1:8000`
+  - `NEXT_PUBLIC_SITE_URL` defaults to `http://localhost:3000`
+  - `NEXT_PUBLIC_SITE_NAME` defaults to `Insurance`
 - Run:
   - `cd insurance`
   - `npm install`
@@ -57,14 +56,14 @@ In two terminals:
   - `cd backend && python manage.py runserver 8000`
 - Terminal 2:
   - `cd insurance && npm run dev`
-Ensure `NEXT_PUBLIC_API_BASE_URL` in `insurance/.env.local` points to the backend URL.
+If you override env, ensure `NEXT_PUBLIC_API_BASE_URL` points to the backend URL.
 
 ## Deployment
 
 ### Recommended
 - Frontend: Vercel (or Netlify)
 - Backend: Render / Railway / Fly.io
-- Database: Supabase (Postgres)
+- Database: Neon (Postgres)
 
 ### Backend (Django) on Render/Railway
 - Build: `pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate`
@@ -72,7 +71,7 @@ Ensure `NEXT_PUBLIC_API_BASE_URL` in `insurance/.env.local` points to the backen
 - Env to set in provider UI:
   - `SECRET_KEY`, `DEBUG=false`, `ALLOWED_HOSTS=<backend-domain>`
   - `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT=5432`, `DB_SSLMODE=require`
-  - `SITE_URL=<backend-url>`, `SITE_NAME=Insurance Panda`
+  - `SITE_URL=<backend-url>`, `SITE_NAME=Insurance`
   - `CORS_ALLOWED_ORIGINS=https://<frontend-domain>`
   - `CSRF_TRUSTED_ORIGINS=https://<frontend-domain>`
 
@@ -80,7 +79,7 @@ Ensure `NEXT_PUBLIC_API_BASE_URL` in `insurance/.env.local` points to the backen
 - Env:
   - `NEXT_PUBLIC_API_BASE_URL=https://<backend-domain>`
   - `NEXT_PUBLIC_SITE_URL=https://<frontend-domain>`
-  - `NEXT_PUBLIC_SITE_NAME=Insurance Panda`
+  - `NEXT_PUBLIC_SITE_NAME=Insurance`
 
 ## Performance
 - Django: `GZipMiddleware` enabled for compression

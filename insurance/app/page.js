@@ -1,52 +1,47 @@
 import React from "react";
 import HomeClient from "./HomeClient";
-import { SITE_URL, SITE_NAME } from "@/lib/config";
+import { API_BASE_URL } from "@/lib/config";
+import { getCompanyInfo, getStaticPage } from "@/lib/api/pages";
 
-// ✅ Page Metadata
-export const metadata = {
-  title: "Affordable Car Insurance Quotes | Insurance Panda",
-  description:
-    "Compare affordable car insurance quotes from top providers. Insurance Panda helps you save money by finding the best auto insurance coverage tailored to your needs.",
-  keywords: [
-    "car insurance quotes",
-    "cheap auto insurance",
-    "compare car insurance",
-    "insurance panda",
-    "affordable car insurance",
-    "vehicle coverage",
-  ],
-  openGraph: {
-    title: "Affordable Car Insurance Quotes | Insurance Panda",
-    description:
-      "Get affordable car insurance quotes instantly. Insurance Panda helps you compare policies and save on your auto insurance today.",
-    url: SITE_URL ? `${SITE_URL}/` : undefined,
-    siteName: SITE_NAME,
-    images: [
-      {
-        url: "/images/home-banner.jpg", // optional – replace with your homepage image
-        width: 1200,
-        height: 630,
-        alt: "Affordable Car Insurance Quotes",
-      },
+export async function generateMetadata() {
+  const companyInfo = await getCompanyInfo().catch(() => null);
+  const brand = companyInfo?.company_name || "Insurance Panda";
+  const title = `Affordable Car Insurance Quotes | ${brand}`;
+  const description = `Compare affordable car insurance quotes from top providers. ${brand} helps you save money by finding the best auto insurance coverage tailored to your needs.`;
+  const imageUrl = "/images/home-banner.jpg";
+  return {
+    title,
+    description,
+    keywords: [
+      "car insurance quotes",
+      "cheap auto insurance",
+      "compare car insurance",
+      brand.toLowerCase(),
+      "affordable car insurance",
+      "vehicle coverage",
     ],
-    locale: "en_US",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Affordable Car Insurance Quotes | Insurance Panda",
-    description:
-      "Compare car insurance quotes and save with Insurance Panda — the easiest way to find affordable auto coverage online.",
-    images: ["/images/home-banner.jpg"], // optional
-  },
-};
+    openGraph: {
+      title,
+      description,
+      images: [{ url: imageUrl, width: 1200, height: 630, alt: "Affordable Car Insurance Quotes" }],
+      type: "website",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [imageUrl],
+    },
+  };
+}
 
-const HomeClientPage = () => {
+export default async function HomeClientPage() {
+  const companyInfo = await getCompanyInfo().catch(() => null);
+  const aboutPage = await getStaticPage("about").catch(() => null);
+  const aboutHtml = aboutPage?.content || null;
   return (
     <div>
-      <HomeClient />
+      <HomeClient companyInfo={companyInfo} aboutHtml={aboutHtml} />
     </div>
   );
-};
-
-export default HomeClientPage;
+}

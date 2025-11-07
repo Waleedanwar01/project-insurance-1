@@ -6,13 +6,13 @@ Frontend for Project Insurance using Next.js App Router.
 - Node.js 18+
 - Backend API running (Django) at `http://127.0.0.1:8000` or a deployed URL
 
-## Environment
-Create `./.env.local` with:
-```
-NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000
-NEXT_PUBLIC_SITE_URL=http://localhost:3000
-NEXT_PUBLIC_SITE_NAME=Insurance Panda
-```
+## Environment (Optional)
+Works out of the box without env files.
+- Defaults:
+  - `NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000`
+  - `NEXT_PUBLIC_SITE_URL=http://localhost:3000`
+  - `NEXT_PUBLIC_SITE_NAME=Insurance`
+If you need custom values, create `./.env.local` and override them.
 
 ## Development
 ```bash
@@ -29,6 +29,6 @@ Open `http://localhost:3000`.
 ## Deployment
 - Recommended: Vercel
 - Set env vars in the platform UI:
-  - `NEXT_PUBLIC_API_BASE_URL`
-  - `NEXT_PUBLIC_SITE_URL`
-  - `NEXT_PUBLIC_SITE_NAME`
+  - `NEXT_PUBLIC_API_BASE_URL` (required)
+  - `NEXT_PUBLIC_SITE_URL` (optional)
+  - `NEXT_PUBLIC_SITE_NAME` (optional)

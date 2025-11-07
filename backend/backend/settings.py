@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 import os
 from pathlib import Path
-import dj_database_url
 from decouple import config, Csv
 from dotenv import load_dotenv
 from urllib.parse import urlparse, parse_qsl
@@ -20,7 +19,7 @@ from urllib.parse import urlparse, parse_qsl
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load environment variables from .env if present
-load_dotenv()
+load_dotenv(override=True)
 
 
 # Quick-start development settings - unsuitable for production
@@ -101,45 +100,20 @@ TEMPLATES = [
 WSGI_APPLICATION = 'backend.wsgi.application'
 
 
-# Database (PostgreSQL via environment variables)
-# Database
-# Switchable via USE_SQLITE env for easy local development
-# Default now False so Postgres is used unless explicitly set to True
+# Database (Neon Postgres via DATABASE_URL)
+tmpPostgres = urlparse(os.getenv("DATABASE_URL"))
 
-
-
-if USE_SQLITE:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': tmpPostgres.path.replace('/', ''),
+        'USER': tmpPostgres.username,
+        'PASSWORD': tmpPostgres.password,
+        'HOST': tmpPostgres.hostname,
+        'PORT': tmpPostgres.port or 5432,
+        'OPTIONS': dict(parse_qsl(tmpPostgres.query)),
     }
-else:
-    # Prefer explicit parsing to support Neon query options like channel_binding
-    db_url = os.getenv("DATABASE_URL", "")
-    if db_url:
-        tmpPostgres = urlparse(db_url)
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql',
-                'NAME': tmpPostgres.path.replace('/', ''),
-                'USER': tmpPostgres.username,
-                'PASSWORD': tmpPostgres.password,
-                'HOST': tmpPostgres.hostname,
-                'PORT': tmpPostgres.port or 5432,
-                'OPTIONS': dict(parse_qsl(tmpPostgres.query)),
-            }
-        }
-    else:
-        # Fallback to dj_database_url for general Postgres URLs
-        DATABASES = {
-            'default': dj_database_url.config(
-                default=config('DATABASE_URL', default=''),
-                conn_max_age=600,
-                ssl_require=True,
-            )
-        }
+}
 
 
 # Password validation

@@ -61,7 +61,8 @@ const testimonials = [
 
 
 
-const FeatureSection = () => {
+const FeatureSection = ({ companyInfo, aboutHtml }) => {
+  const brandName = companyInfo?.company_name || 'Insurance';
   const [recentBlogs, setRecentBlogs] = useState([]);
   const [recentFaqs, setRecentFaqs] = useState([]);
   const [loading, setLoading] = useState({ blogs: true, faqs: true });
@@ -135,7 +136,7 @@ const FeatureSection = () => {
           >
             Save on Car Insurance{" "}
             <span className="text-red-600 font-extrabold">
-              with Insurance Panda
+              with {brandName}
             </span>
           </h2>
 
@@ -237,7 +238,7 @@ const FeatureSection = () => {
                   height={200}
                   // Placeholder image URL for the panda in the red car. You MUST replace this URL.
                   src="/images/about-insurance-panda.png"
-                  alt="Illustration of Insurance Panda in a red car"
+                  alt={`Illustration of ${brandName} in a red car`}
                   className="w-full max-w-sm h-auto object-contain rounded-lg"
                   style={{ width: 'auto', height: 'auto' }}
                   onError={(e) => {
@@ -251,23 +252,29 @@ const FeatureSection = () => {
               {/* Column 2: Text Content (Takes 3/5ths width on desktop) */}
               <div className="lg:col-span-3">
                 <h2 className="text-gray-900 text-3xl md:text-4xl font-extrabold mb-6 leading-snug">
-                  About <span className="text-red-600">Insurance Panda</span>
+                  About <span className="text-red-600">{brandName}</span>
                 </h2>
 
-                <p className="text-gray-600 text-lg leading-relaxed mb-4">
-                  Insurance Panda is a leading auto insurance quote comparison
-                  platform designed to help American drivers secure affordable
-                  coverage. Through our secure and user-friendly tool, you can
-                  easily compare quotes from reputable insurers in your area,
-                  potentially saving you up to **$1,000 annually** on your auto
-                  insurance premiums.
-                </p>
+                {aboutHtml ? (
+                  <div className="prose prose-red max-w-none" dangerouslySetInnerHTML={{ __html: aboutHtml }} />
+                ) : (
+                  <>
+                    <p className="text-gray-600 text-lg leading-relaxed mb-4">
+                      {brandName} is a leading auto insurance quote comparison
+                      platform designed to help American drivers secure affordable
+                      coverage. Through our secure and user-friendly tool, you can
+                      easily compare quotes from reputable insurers in your area,
+                      potentially saving you up to **$1,000 annually** on your auto
+                      insurance premiums.
+                    </p>
 
-                <p className="text-gray-600 text-lg leading-relaxed">
-                  Get started today by entering your zip code in the section
-                  above! We are committed to transparency, security, and making
-                  sure you find the best rate without the hassle.
-                </p>
+                    <p className="text-gray-600 text-lg leading-relaxed">
+                      Get started today by entering your zip code in the section
+                      above! We are committed to transparency, security, and making
+                      sure you find the best rate without the hassle.
+                    </p>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -296,7 +303,7 @@ const FeatureSection = () => {
               className="text-gray-600 text-lg md:text-xl font-normal leading-relaxed px-4 md:px-0 animate-fade-in-up"
               style={{ animationDelay: "0.2s" }}
             >
-              Read how Insurance Panda helped others save. Trusted testimonials
+              Read how {brandName} helped others save. Trusted testimonials
               from real drivers.
             </p>
           </div>
@@ -317,7 +324,7 @@ const FeatureSection = () => {
 
                 {/* Quote content */}
                 <p className="text-gray-700 text-base italic leading-relaxed z-10 mb-4">
-                  "{testimonial.quote}"
+                  "{testimonial.quote.replace(/Insurance Panda/g, brandName)}"
                 </p>
 
                 {/* Separator Line */}
