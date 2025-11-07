@@ -1,34 +1,28 @@
 import React from 'react'
 import TermsClient from './TermsClient';
-export const metadata = {
-  title: "Terms and Conditions | YourAutoQuotes",
-  description:
-    "Review the Terms and Conditions of YourAutoQuotes to understand your rights, obligations, and our policies regarding the use of our services and website.",
-  openGraph: {
-    title: "Terms and Conditions | YourAutoQuotes",
-    description:
-      "Read the Terms and Conditions of YourAutoQuotes to learn about user responsibilities, service usage, and legal disclaimers.",
-    url: "https://yourautoquotes.com/terms-and-conditions",
-    siteName: "YourAutoQuotes",
-    images: [
-      {
-        url: "/images/terms-conditions-banner.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Terms and Conditions - YourAutoQuotes",
+import { API_BASE_URL } from '@/lib/config'
+
+export async function generateMetadata() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/pages/terms/`, { next: { revalidate: 600 } });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const page = await res.json();
+    const title = page?.meta_title || page?.title || 'Terms and Conditions';
+    const description = page?.meta_description || undefined;
+    const keywords = page?.meta_keywords ? page.meta_keywords.split(',').map(k => k.trim()).filter(Boolean) : undefined;
+    return {
+      title,
+      description,
+      keywords,
+      openGraph: {
+        title,
+        description,
       },
-    ],
-    locale: "en_US",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Terms and Conditions | YourAutoQuotes",
-    description:
-      "Understand the rules and policies for using YourAutoQuotes services by reviewing our Terms and Conditions.",
-    images: ["/images/terms-conditions-banner.jpg"],
-  },
-};
+    };
+  } catch {
+    return { title: 'Terms and Conditions' };
+  }
+}
 
 const TermsPage = () => {
   return (

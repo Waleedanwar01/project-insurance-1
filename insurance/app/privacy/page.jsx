@@ -1,34 +1,28 @@
 import React from 'react'
 import PrivacyClient from './PrivacyClient'
-export const metadata = {
-  title: "Privacy Policy | YourAutoQuotes",
-  description:
-    "Read the Privacy Policy of YourAutoQuotes to understand how we collect, use, and protect your personal information. We value your privacy and ensure transparency in our data practices.",
-  openGraph: {
-    title: "Privacy Policy | YourAutoQuotes",
-    description:
-      "Learn how YourAutoQuotes protects your privacy and handles your data responsibly. Review our policy on information collection, cookies, and data security.",
-    url: "https://yourautoquotes.com/privacy-policy",
-    siteName: "YourAutoQuotes",
-    images: [
-      {
-        url: "/images/privacy-policy-banner.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Privacy Policy - YourAutoQuotes",
+import { API_BASE_URL } from '@/lib/config'
+
+export async function generateMetadata() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/pages/privacy/`, { next: { revalidate: 600 } });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const page = await res.json();
+    const title = page?.meta_title || page?.title || 'Privacy Policy';
+    const description = page?.meta_description || undefined;
+    const keywords = page?.meta_keywords ? page.meta_keywords.split(',').map(k => k.trim()).filter(Boolean) : undefined;
+    return {
+      title,
+      description,
+      keywords,
+      openGraph: {
+        title,
+        description,
       },
-    ],
-    locale: "en_US",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Privacy Policy | YourAutoQuotes",
-    description:
-      "Understand how YourAutoQuotes collects and protects your personal data in compliance with modern privacy standards.",
-    images: ["/images/privacy-policy-banner.jpg"],
-  },
-};
+    };
+  } catch {
+    return { title: 'Privacy Policy' };
+  }
+}
 
 const PrivacyPolicy = () => {
   return (

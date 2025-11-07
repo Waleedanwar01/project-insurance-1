@@ -31,7 +31,8 @@ DEBUG = config('DEBUG', cast=bool, default=True)
 USE_SQLITE = config('USE_SQLITE', cast=bool, default=True)
 
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost', cast=Csv())
+# Allow localhost and 127.0.0.1 by default for dev to ensure media/API loads
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
 
 
 # Application definition

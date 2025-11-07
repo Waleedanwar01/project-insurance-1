@@ -62,6 +62,18 @@ export default function FaqDetailClient() {
     fetchData();
   }, [slug]);
 
+  // Ensure browser tab title matches the FAQ question (or admin-set meta_title)
+  useEffect(() => {
+    try {
+      if (faq?.question || faq?.meta_title) {
+        const t = faq?.meta_title || faq?.question;
+        if (t && typeof document !== 'undefined') {
+          document.title = t;
+        }
+      }
+    } catch {}
+  }, [faq?.question, faq?.meta_title]);
+
   const handleFeedback = async (isHelpful) => {
     if (feedback.submitted) return;
     try {

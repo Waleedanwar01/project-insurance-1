@@ -1,34 +1,19 @@
 import React from 'react'
 import InsuranceGuideClient from './InsuranceGuideClient'
-export const metadata = {
-  title: "Auto Insurance Guide | Learn How Car Insurance Works",
-  description:
-    "Understand everything about auto insurance with our complete guide. Learn about coverage types, policy options, and tips to save on your car insurance.",
-  openGraph: {
-    title: "Auto Insurance Guide | Learn How Car Insurance Works",
-    description:
-      "Explore our comprehensive auto insurance guide. Learn about liability, collision, comprehensive coverage, and how to choose the right car insurance policy.",
-    url: "https://yourautoquotes.com/insurance-guide",
-    siteName: "YourAutoQuotes",
-    images: [
-      {
-        url: "/images/insurance-guide-cover.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Auto Insurance Guide - YourAutoQuotes",
-      },
-    ],
-    locale: "en_US",
-    type: "article",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Auto Insurance Guide | Learn How Car Insurance Works",
-    description:
-      "Get expert insights into car insurance. Our guide explains coverage options, terms, and how to find affordable auto insurance.",
-    images: ["/images/insurance-guide-cover.jpg"],
-  },
-};
+import { API_BASE_URL } from '@/lib/config';
+
+export async function generateMetadata() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/pages/insurance-guide/`, { next: { revalidate: 600 } });
+    const page = res.ok ? await res.json() : null;
+    const title = page?.meta_title || page?.title || "Auto Insurance Guide | Learn How Car Insurance Works";
+    const description = page?.meta_description || "Understand everything about auto insurance with our complete guide. Learn about coverage types, policy options, and tips to save on your car insurance.";
+    const keywords = page?.meta_keywords ? page.meta_keywords.split(',').map(k=>k.trim()) : undefined;
+    return { title, description, keywords, openGraph: { title, description }, twitter: { title, description } };
+  } catch (e) {
+    return { title: "Auto Insurance Guide | Learn How Car Insurance Works", description: "Understand everything about auto insurance with our complete guide. Learn about coverage types, policy options, and tips to save on your car insurance." };
+  }
+}
 
 const InsuranceGuide = () => {
   return (

@@ -33,6 +33,12 @@ class FAQAdmin(admin.ModelAdmin):
         ('Content', {
             'fields': ('short_answer', 'answer')
         }),
+        ('SEO', {
+            'fields': ('meta_title', 'meta_description', 'meta_keywords')
+        }),
+        ('Author Bio', {
+            'fields': ('author_name', 'author_bio', 'author_image')
+        }),
         ('Settings', {
             'fields': ('is_published', 'is_featured', 'order', 'tags')
         }),

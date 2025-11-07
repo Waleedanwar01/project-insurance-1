@@ -15,7 +15,10 @@ class StaticPageAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('Page Information', {
-            'fields': ('page_type', 'title', 'menu_label', 'nav_group', 'meta_description')
+            'fields': ('page_type', 'title', 'menu_label', 'nav_group')
+        }),
+        ('SEO', {
+            'fields': ('meta_title', 'meta_description', 'meta_keywords')
         }),
         ('Content', {
             'fields': ('content',)
@@ -109,12 +112,18 @@ class CarInsuranceQuotesPageAdmin(admin.ModelAdmin):
             widget=forms.Textarea(attrs={'rows': 8}),
             help_text='Enter one FAQ per line as: question | answer'
         )
+        toc_items_csv = forms.CharField(
+            required=False,
+            widget=forms.Textarea(attrs={'rows': 6}),
+            help_text='Enter one TOC item per line as: label | #anchor-id'
+        )
 
         class Meta:
             model = CarInsuranceQuotesPage
             fields = [
                 'title', 'last_updated',
-                'author_name', 'author_bio', 'author_image_url',
+                'body_html', 'toc_items_csv', 'video_url',
+                'author_name', 'author_bio', 'author_image', 'author_context',
                 # JSON fields are managed via the human-friendly inputs
             ]
 
@@ -143,6 +152,13 @@ class CarInsuranceQuotesPageAdmin(admin.ModelAdmin):
                         a = f.get('answer', '')
                         faq_lines.append(f"{q} | {a}")
                     self.initial['faqs_csv'] = '\n'.join(faq_lines)
+                if instance.toc_items:
+                    toc_lines = []
+                    for t in instance.toc_items:
+                        label = t.get('label', '')
+                        anchor = t.get('anchor', '')
+                        toc_lines.append(f"{label} | {anchor}")
+                    self.initial['toc_items_csv'] = '\n'.join(toc_lines)
 
         def clean(self):
             cleaned = super().clean()
@@ -200,6 +216,23 @@ class CarInsuranceQuotesPageAdmin(admin.ModelAdmin):
                     'answer': answer,
                 })
             self.instance.faqs = faqs_rows
+
+            # Parse TOC items
+            toc_text = self.cleaned_data.get('toc_items_csv', '') or ''
+            toc_rows = []
+            for raw_line in toc_text.splitlines():
+                line = raw_line.strip()
+                if not line:
+                    continue
+                parts = [p.strip() for p in line.split('|')]
+                if len(parts) < 2:
+                    continue
+                label, anchor = parts[:2]
+                toc_rows.append({
+                    'label': label,
+                    'anchor': anchor,
+                })
+            self.instance.toc_items = toc_rows
             return cleaned
 
     form = CarInsuranceQuotesPageForm
@@ -211,9 +244,19 @@ class CarInsuranceQuotesPageAdmin(admin.ModelAdmin):
         ('Page Info', {
             'fields': ('title', 'last_updated')
         }),
+        ('SEO', {
+            'fields': ('meta_title', 'meta_description', 'meta_keywords')
+        }),
+        ('Main Content', {
+            'fields': ('body_html', 'video_url')
+        }),
         ('Intro & Takeaways', {
             'fields': ('intro_paragraphs_text', 'takeaways_text'),
             'description': 'Add one item per line; we handle formatting.'
+        }),
+        ('Table Of Contents', {
+            'fields': ('toc_items_csv',),
+            'description': 'Format: Label | #anchor-id (one per line)'
         }),
         ('State Insurance Data', {
             'fields': ('state_insurance_csv',),
@@ -224,7 +267,7 @@ class CarInsuranceQuotesPageAdmin(admin.ModelAdmin):
             'description': 'Format: question | answer (one per line)'
         }),
         ('Author', {
-            'fields': ('author_name', 'author_bio', 'author_image_url')
+            'fields': ('author_name', 'author_bio', 'author_image', 'author_context')
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),

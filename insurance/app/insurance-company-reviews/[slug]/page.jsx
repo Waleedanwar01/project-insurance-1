@@ -9,12 +9,18 @@ export async function generateMetadata({ params }) {
     const res = await fetch(`${API_BASE_URL}/api/company/insurers/${slug}/`, { next: { revalidate: 1800 } });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const company = await res.json();
+    const review = company.reviews?.[0];
+    const baseTitle = company.name ? `${company.name} Review` : (review?.title || slug);
+    const title = (review?.meta_title || baseTitle) + " | Insurance Panda";
+    const description = review?.meta_description || company.description || `Read the review of ${company.name}.`;
+    const keywords = review?.meta_keywords ? review.meta_keywords.split(',').map(k => k.trim()).filter(Boolean) : undefined;
     return {
-      title: `${company.name} Review | Insurance Panda`,
-      description: company.description || `Read the review of ${company.name}.`,
+      title,
+      description,
+      keywords,
       openGraph: {
-        title: `${company.name} Review`,
-        description: company.description || "",
+        title: baseTitle,
+        description,
         images: company.logo ? [{ url: company.logo }] : [],
       },
     };

@@ -72,6 +72,9 @@ class CompanyReviewAdmin(admin.ModelAdmin):
         ("Review", {
             "fields": ("company", "title", "slug", "summary", "content", "rating", "author_name")
         }),
+        ("SEO", {
+            "fields": ("meta_title", "meta_description", "meta_keywords")
+        }),
         ("Status", {
             "fields": ("is_published", "published_at")
         }),

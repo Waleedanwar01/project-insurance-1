@@ -1,57 +1,54 @@
 // components/ArticleLayout.js - Collapsible TOC (Accordion Style)
 "use client"
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import Image from 'next/image';
-import { getCarInsuranceQuotesPage } from '@/lib/api/pages';
+import { SITE_URL, API_BASE_URL } from "@/lib/config";
 // State pulled from API
 const defaultTitle = 'Car Insurance Quotes';
 const defaultLastUpdated = 'May 29, 2023';
 
+// Build absolute image URL from backend media path
+const getImageUrl = (src) => {
+    if (!src) return null;
+    const isAbsolute = /^https?:\/\//i.test(src);
+    return isAbsolute ? src : `${API_BASE_URL}${src}`;
+};
+
 // 1. Use State to manage which FAQ item is open (We use the index)
 // --- END TABLE DATA ---
-const ArticleLayout = () => {
+const ArticleLayout = ({ initialData }) => {
     const [openIndex, setOpenIndex] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [title, setTitle] = useState(defaultTitle);
-    const [lastUpdated, setLastUpdated] = useState(defaultLastUpdated);
-    const [introParagraphs, setIntroParagraphs] = useState([]);
-    const [takeaways, setTakeaways] = useState([]);
-    const [stateInsuranceData, setStateInsuranceData] = useState([]);
-    const [faqsData, setFaqsData] = useState([]);
-    const [authorName, setAuthorName] = useState('');
-    const [authorBio, setAuthorBio] = useState('');
-    const [authorImageUrl, setAuthorImageUrl] = useState('/images/james-shaffer.png');
-
-    useEffect(() => {
-        let ignore = false;
-        async function load() {
-            try {
-                const data = await getCarInsuranceQuotesPage();
-                if (ignore) return;
-                setTitle(data?.title || defaultTitle);
-                setLastUpdated(
-                    data?.last_updated ? new Date(data.last_updated).toLocaleDateString() : defaultLastUpdated
-                );
-                setIntroParagraphs(Array.isArray(data?.intro_paragraphs) ? data.intro_paragraphs : []);
-                setTakeaways(Array.isArray(data?.takeaways) ? data.takeaways : []);
-                setStateInsuranceData(Array.isArray(data?.state_insurance_data) ? data.state_insurance_data : []);
-                setFaqsData(Array.isArray(data?.faqs) ? data.faqs : []);
-                setAuthorName(data?.author_name || 'James Shaffer');
-                setAuthorBio(
-                    data?.author_bio ||
-                    'James Shaffer is a writer for InsurancePanda.com and a well-seasoned auto insurance industry veteran.'
-                );
-                setAuthorImageUrl(data?.author_image_url || '/images/james-shaffer.png');
-            } catch (e) {
-                console.error(e);
-            } finally {
-                setLoading(false);
-            }
+    // Stable date formatting to avoid hydration mismatches
+    const formatDate = (value) => {
+        try {
+            return new Date(value).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        } catch {
+            return defaultLastUpdated;
         }
-        load();
-        return () => { ignore = true };
-    }, []);
+    };
+    const [title, setTitle] = useState(initialData?.title || defaultTitle);
+    const [lastUpdated, setLastUpdated] = useState(
+        initialData?.last_updated ? formatDate(initialData.last_updated) : defaultLastUpdated
+    );
+    const [introParagraphs, setIntroParagraphs] = useState(
+        Array.isArray(initialData?.intro_paragraphs) ? initialData.intro_paragraphs : []
+    );
+    const [takeaways, setTakeaways] = useState(Array.isArray(initialData?.takeaways) ? initialData.takeaways : []);
+    const [stateInsuranceData, setStateInsuranceData] = useState(
+        Array.isArray(initialData?.state_insurance_data) ? initialData.state_insurance_data : []
+    );
+    const [faqsData, setFaqsData] = useState(Array.isArray(initialData?.faqs) ? initialData.faqs : []);
+    const [tocItems, setTocItems] = useState(Array.isArray(initialData?.toc_items) ? initialData.toc_items : []);
+    const [bodyHtml, setBodyHtml] = useState(initialData?.body_html || '');
+    const [videoUrl, setVideoUrl] = useState(initialData?.video_url || '');
+    const [authorName, setAuthorName] = useState(initialData?.author_name || 'James Shaffer');
+    const [authorBio, setAuthorBio] = useState(
+        initialData?.author_bio ||
+        'James Shaffer is a writer for InsurancePanda.com and a well-seasoned auto insurance industry veteran.'
+    );
+    const [authorImageUrl, setAuthorImageUrl] = useState(getImageUrl(initialData?.author_image) || '/images/james-shaffer.png');
+    const [authorContext, setAuthorContext] = useState(initialData?.author_context || 'detail');
     const toggleItem = (index) => setOpenIndex(index === openIndex ? null : index);
 
     // 1. Use State to manage the collapse/expand feature
@@ -69,7 +66,7 @@ const ArticleLayout = () => {
                         <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight">
                             {title}
                         </h1>
-                        <p className="mt-2 text-sm text-gray-500 font-medium">
+                        <p className="mt-2 text-sm text-gray-500 font-medium" suppressHydrationWarning={true}>
                             Last Updated on {lastUpdated}
                         </p>
                     </header>
@@ -119,34 +116,16 @@ const ArticleLayout = () => {
                             >
                                 {/* Main TOC List */}
                                 <ul className="space-y-2 text-base">
-                                    <li>
-                                        <a href="#how-it-works" className="text-gray-700 hover:text-red-600">How Does Insurance Panda Work?</a>
-                                        <ul className="mt-2 space-y-1 ml-4 list-disc list-inside">
-                                            <li><a href="#three-step" className="text-gray-600 hover:text-red-600 text-sm">It’s a Three-Step Process:</a></li>
-                                        </ul>
-                                    </li>
-
-                                    <li>
-                                        <a href="#quote-calculation" className="text-gray-700 hover:text-red-600">How Are Your Car Insurance Quotes Calculated?</a>
-                                        <ul className="mt-2 space-y-1 ml-4 list-disc list-inside">
-                                            <li><a href="#major-factors" className="text-gray-600 hover:text-red-600 text-sm">The Major Factors that Can Determine Your Rates</a></li>
-                                        </ul>
-                                    </li>
-
-                                    <li>
-                                        <a href="#faq" className="text-gray-700 hover:text-red-600">Frequently Asked Questions About Insurance Quotes</a>
-                                        <ul className="mt-2 space-y-1 ml-4">
-                                            <li className="list-disc list-inside"><a href="#safe-online" className="text-gray-600 hover:text-red-600 text-sm">Is getting a car insurance quote online safe?</a></li>
-                                            <li className="list-disc list-inside"><a href="#credit-check" className="text-gray-600 hover:text-red-600 text-sm">Do you need a credit check to get a car insurance quote online?</a></li>
-                                            <li className="list-disc list-inside"><a href="#free-quote" className="text-gray-600 hover:text-red-600 text-sm">Is getting a car insurance quote online free?</a></li>
-                                            <li className="list-disc list-inside"><a href="#personal-info" className="text-gray-600 hover:text-red-600 text-sm">Do you need to use your personal information to get an insurance quote?</a></li>
-                                            <li className="list-disc list-inside"><a href="#ssn" className="text-gray-600 hover:text-red-600 text-sm">Do you need to provide your social security number (SSN) to get an insurance quote?</a></li>
-                                        </ul>
-                                    </li>
-
-                                    <li><a href="#validity" className="text-gray-700 hover:text-red-600">How long are car insurance quotes valid for?</a></li>
-                                    <li><a href="#high-quotes" className="text-gray-700 hover:text-red-600">Why are my car insurance quotes so high?</a></li>
-                                    <li><a href="#save-premiums" className="text-gray-700 hover:text-red-600">Are You Ready to Save on Your Auto Insurance Premiums?</a></li>
+                                    {(tocItems && tocItems.length ? tocItems : [
+                                        { label: 'How Does It Work?', anchor: '#how-it-works' },
+                                        { label: 'How Quotes Are Calculated', anchor: '#quote-calculation' },
+                                        { label: 'Frequently Asked Questions', anchor: '#faq' },
+                                        { label: 'Save on Premiums', anchor: '#save-premiums' },
+                                    ]).map((item, idx) => (
+                                        <li key={idx}>
+                                            <a href={item.anchor} className="text-gray-700 hover:text-red-600">{item.label}</a>
+                                        </li>
+                                    ))}
                                 </ul>
                             </div>
 
@@ -154,56 +133,28 @@ const ArticleLayout = () => {
                     </div>
 
 
-                    {/* 2. SECTION: What Is Insurance Panda? */}
-                    <section className="py-0">
-                        <h2 className="text-2xl font-bold mb-4 text-red-500">
-                            What Is Insurance Panda?
-                        </h2>
-
-                        {/* Adjusting layout for a simpler, less graphical look, closer to the source image's text column */}
-                        <div className="text-gray-600 leading-relaxed">
-                            <p className="mb-6">
-                                Insurance Panda is your go-to platform for finding reliable and affordable car insurance.
-                                As a trusted leader in the industry, we’re dedicated to helping you find comprehensive coverage
-                                options starting at low rates. Our commitment to simplicity and transparency makes securing your
-                                insurance straightforward and stress-free.
-                            </p>
-
-                            <h3 className="text-lg font-bold mb-3 text-gray-700">
-                                Using Insurance Panda is a simple three-step process:
-                            </h3>
-                            {/* Using a simple list style to mimic the original bullet-point feel */}
-                            <ul className="list-disc ml-6 space-y-1 text-gray-700 font-medium">
-                                <li>Enter your zip code</li>
-                                <li>Enter some basic information</li>
-                                <li>Compare auto insurance rates and find the cheapest one</li>
-                            </ul>
-
-                            {/* Placeholder for the video embed at the bottom of the section content */}
-                            <p className="text-gray-600 mt-6 mb-4">
-                                To get a better idea of how Insurance Panda works, check out this video:
-                            </p>
-                            {/* === VIDEO EMBED CODE START === */}
-                            {/* Responsive 16:9 video wrapper (requires @tailwindcss/aspect-ratio plugin if not using Tailwind 3.0+ native utilities) */}
-                            <div className="relative pt-[30.25%]"> {/* pt-[56.25%] forces a 16:9 aspect ratio */}
-                                <iframe
-                                    className="absolute top-0 left-0 w-fit h-fit md:w-100 md:h-60  rounded-lg shadow-xl"
-                                    src="https://www.youtube.com/embed/x7KLhLn7HeY?si=GjMQXIRB4wDWOq6M"
-                                    title="YouTube video player"
-                                    frameBorder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                    referrerPolicy="strict-origin-when-cross-origin"
-                                    allowFullScreen
-                                ></iframe>
-                                <p className='text-gray-600 mt-16 md:mt-0'>
-                                    It works like this – once you give us your basic information, we send it to the insurance companies fighting for your business. They will run their risk assessment calculations and shoot their quotes back to us. We will then present them to you so you can decide which company to go with.
-
-                                    This is the most painless way to shop for auto insurance as a consumer. Let us do all the heavy lifting for you and get the insurance companies scrambling for your business. Remember – the consumer always gets the best price when the competition is fierce.
-                                </p>
-                            </div>
-                            {/* === VIDEO EMBED CODE END === */}
-                        </div>
-                    </section>
+                    {/* Main dynamic body content */}
+                    {bodyHtml ? (
+                        <section className="py-0">
+                            <div
+                                className="text-gray-700 leading-relaxed space-y-6"
+                                dangerouslySetInnerHTML={{ __html: bodyHtml }}
+                            />
+                            {videoUrl ? (
+                                <div className="relative pt-[30.25%] mt-6">
+                                    <iframe
+                                        className="absolute top-0 left-0 w-fit h-fit md:w-100 md:h-60 rounded-lg shadow-xl"
+                                        src={videoUrl}
+                                        title="Video"
+                                        frameBorder="0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                        referrerPolicy="strict-origin-when-cross-origin"
+                                        allowFullScreen
+                                    />
+                                </div>
+                            ) : null}
+                        </section>
+                    ) : null}
                     {/* === 3. SECTION: How Are Your Car Insurance Quotes Calculated? === */}
                     <section id="quote-calculation" className="py-8">
                         <h2 className="text-3xl font-bold mb-6 text-gray-900 border-b border-red-200 pb-2">
@@ -493,9 +444,11 @@ const ArticleLayout = () => {
                                 </div>
 
                                 {/* Concluding Paragraph */}
-                                <p className="mt-8 text-base text-gray-800 p-4 border-t border-b border-red-100 bg-red-50 rounded-md">
-                                    To learn more about how to save on your insurance and which factors affect your insurance rates, explore the <a href={SITE_URL ? `${SITE_URL}/insurance-guide/` : "/insurance-guide/"} className="text-red-600 hover:text-red-800 font-medium hover:underline">insurance guide at InsurancePanda.com</a>. We will equip you with all the tools you need to make an informed decision about your auto insurance coverage.
-                                </p>
+                                {(!bodyHtml) && (
+                                    <p className="mt-8 text-base text-gray-800 p-4 border-t border-b border-red-100 bg-red-50 rounded-md">
+                                        To learn more about how to save on your insurance and which factors affect your insurance rates, explore the <a href={SITE_URL ? `${SITE_URL}/insurance-guide/` : "/insurance-guide/"} className="text-red-600 hover:text-red-800 font-medium hover:underline">insurance guide</a>. We will equip you with all the tools you need to make an informed decision about your auto insurance coverage.
+                                    </p>
+                                )}
 
                             </div>
                         </section>
@@ -546,7 +499,8 @@ const ArticleLayout = () => {
                         <section id="save-premiums" className="py-8 space-y-8">
 
 
-                            {/* Author Bio */}
+                            {/* Author Bio (only for detail pages) */}
+                            {authorContext === 'detail' && (
                             <div className="flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-4 p-6 border border-gray-200 rounded-lg shadow-md bg-white">
                                 {/* Author Image/Placeholder */}
                                 <div className="flex-shrink-0">
@@ -571,6 +525,7 @@ const ArticleLayout = () => {
                                     </p>
                                 </div>
                             </div>
+                            )}
 
                         </section>
                     </section>
@@ -582,4 +537,3 @@ const ArticleLayout = () => {
 };
 
 export default ArticleLayout;
-import { SITE_URL } from "@/lib/config";

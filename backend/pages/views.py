@@ -160,4 +160,23 @@ class CarInsuranceQuotesPageView(generics.RetrieveAPIView):
     serializer_class = CarInsuranceQuotesPageSerializer
 
     def get_object(self):
-        return CarInsuranceQuotesPage.objects.first()
+        obj = CarInsuranceQuotesPage.objects.first()
+        if obj:
+            return obj
+        # Ensure at least one record exists to avoid 404/500
+        return CarInsuranceQuotesPage.objects.create(
+            title='Car Insurance Quotes',
+            intro_paragraphs=[
+                'Compare personalized car insurance quotes and learn how rates are calculated.',
+            ],
+            takeaways=[
+                'Quotes vary by vehicle, location, driving history, and coverage.',
+            ],
+            faqs=[
+                { 'id': 'safe-online', 'question': 'Is getting a car insurance quote online safe?', 'answer': 'Yes, most providers use secure forms and encryption.' },
+            ],
+            toc_items=[
+                { 'label': 'How Quotes Are Calculated', 'anchor': '#quote-calculation' },
+                { 'label': 'Frequently Asked Questions', 'anchor': '#faq' },
+            ],
+        )

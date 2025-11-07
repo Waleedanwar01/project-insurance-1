@@ -1,37 +1,28 @@
 import React from "react";
 import AboutClient from "./AboutClient"; // Adjust path as needed
-import { SITE_URL, SITE_NAME } from "@/lib/config";
+import { API_BASE_URL } from "@/lib/config";
 
-// ✅ Page Metadata
-export const metadata = {
-  title: "About Us | Insurance Panda",
-  description:
-    "Learn more about Insurance Panda — our mission, values, and how we help customers find affordable auto insurance quotes quickly and easily.",
-  keywords: [
-    "about insurance panda",
-    "insurance company information",
-    "auto insurance help",
-    "car insurance guide",
-    "affordable car insurance",
-  ],
-  openGraph: {
-    title: "About Insurance Panda",
-    description:
-      "Discover who we are and how Insurance Panda helps you compare and save on car insurance quotes across top providers.",
-    url: SITE_URL ? `${SITE_URL}/about` : undefined,
-    siteName: SITE_NAME,
-    images: [
-      {
-        url: "/images/about-banner.jpg", // Optional - update path to your actual image
-        width: 1200,
-        height: 630,
-        alt: "About Insurance Panda",
+export async function generateMetadata() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/pages/about/`, { next: { revalidate: 600 } });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const page = await res.json();
+    const title = page?.meta_title || page?.title || "About Us";
+    const description = page?.meta_description || undefined;
+    const keywords = page?.meta_keywords ? page.meta_keywords.split(',').map(k => k.trim()).filter(Boolean) : undefined;
+    return {
+      title,
+      description,
+      keywords,
+      openGraph: {
+        title,
+        description,
       },
-    ],
-    locale: "en_US",
-    type: "website",
-  },
-};
+    };
+  } catch {
+    return { title: "About Us | Insurance Panda" };
+  }
+}
 
 const About = () => {
   return (

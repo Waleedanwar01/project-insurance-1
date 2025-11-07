@@ -1,42 +1,37 @@
 import React from "react";
 import CarInsuranceQuotesClient from "./CarInsuranceQuotesClient";
-import { SITE_URL, SITE_NAME } from "@/lib/config";
+import { API_BASE_URL } from "@/lib/config";
+import { getCarInsuranceQuotesPage } from "@/lib/api/pages";
 
-// ✅ Page Metadata
-export const metadata = {
-  title: "Car Insurance Quotes | Compare & Save Online",
-  description:
-    "Get instant car insurance quotes from top providers. Compare plans, save money, and find the best auto insurance coverage for your needs.",
-  keywords: [
-    "car insurance quotes",
-    "auto insurance",
-    "compare car insurance",
-    "cheap car insurance",
-    "vehicle insurance",
-  ],
-  openGraph: {
-    title: "Car Insurance Quotes | Compare & Save Online",
-    description:
-      "Compare car insurance quotes from multiple providers and find the best policy for your budget.",
-    url: SITE_URL ? `${SITE_URL}/car-insurance-quotes` : undefined,
-    siteName: SITE_NAME,
-    images: [
-      {
-        url: "/images/car-insurance-banner.jpg", // optional: adjust your image path
-        width: 1200,
-        height: 630,
-        alt: "Car Insurance Comparison",
+export async function generateMetadata() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/car-insurance-quotes/`, { next: { revalidate: 900 } });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const page = await res.json();
+    const title = page?.meta_title || page?.title || "Car Insurance Quotes";
+    const description = page?.meta_description || "Compare car insurance quotes from multiple providers and find the best policy for your budget.";
+    const keywords = page?.meta_keywords ? page.meta_keywords.split(',').map(k => k.trim()).filter(Boolean) : undefined;
+    return {
+      title,
+      description,
+      keywords,
+      openGraph: {
+        title,
+        description,
       },
-    ],
-    locale: "en_US",
-    type: "website",
-  },
-};
+    };
+  } catch {
+    return { title: "Car Insurance Quotes" };
+  }
+}
 
-const CarInsuranceQuotes = () => {
+const CarInsuranceQuotes = async () => {
+  // Fetch a stable snapshot on the server to avoid hydration mismatch
+  const initialData = await getCarInsuranceQuotesPage();
+
   return (
     <div>
-      <CarInsuranceQuotesClient />
+      <CarInsuranceQuotesClient initialData={initialData} />
     </div>
   );
 };

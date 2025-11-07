@@ -4,6 +4,29 @@ import { API_BASE_URL } from "@/lib/config";
 import { getCompanyInfo, getStaticPage } from "@/lib/api/pages";
 
 export async function generateMetadata() {
+  // Try admin-configured StaticPage first
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/pages/home/`, { next: { revalidate: 600 } });
+    const page = res.ok ? await res.json() : null;
+    if (page) {
+      const title = page?.meta_title || page?.title || undefined;
+      const description = page?.meta_description || undefined;
+      const keywords = page?.meta_keywords ? page.meta_keywords.split(',').map(k => k.trim()).filter(Boolean) : undefined;
+      if (title || description || keywords) {
+        return {
+          title,
+          description,
+          keywords,
+          openGraph: { title, description },
+          twitter: { title, description },
+        };
+      }
+    }
+  } catch (e) {
+    // fall through to brand-based defaults
+  }
+
+  // Fallback to brand-based defaults if admin page is not set
   const companyInfo = await getCompanyInfo().catch(() => null);
   const brand = companyInfo?.company_name || "Insurance Panda";
   const title = `Affordable Car Insurance Quotes | ${brand}`;

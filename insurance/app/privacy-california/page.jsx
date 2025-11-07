@@ -1,34 +1,19 @@
 import React from 'react'
 import CaliforniaClient from './CaliforniaClient'
-export const metadata = {
-  title: "California Auto Insurance Privacy | YourAutoQuotes",
-  description:
-    "Compare affordable auto insurance quotes in California. Find top-rated providers, explore coverage options, and save money with YourAutoQuotes today.",
-  openGraph: {
-    title: "California Auto Insurance Quotes | YourAutoQuotes",
-    description:
-      "Get the best car insurance rates in California. Compare quotes from trusted insurers and find affordable coverage that fits your needs.",
-    url: "https://yourautoquotes.com/california-auto-insurance",
-    siteName: "YourAutoQuotes",
-    images: [
-      {
-        url: "/images/california-auto-insurance.jpg",
-        width: 1200,
-        height: 630,
-        alt: "California Auto Insurance - YourAutoQuotes",
-      },
-    ],
-    locale: "en_US",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "California Auto Insurance Quotes | YourAutoQuotes",
-    description:
-      "Find affordable car insurance in California with YourAutoQuotes. Compare rates and save on your next policy today.",
-    images: ["/images/california-auto-insurance.jpg"],
-  },
-};
+import { API_BASE_URL } from '@/lib/config'
+
+export async function generateMetadata() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/pages/california_privacy/`, { next: { revalidate: 600 } });
+    const page = res.ok ? await res.json() : null;
+    const title = page?.meta_title || page?.title || 'California Privacy Policy';
+    const description = page?.meta_description || 'California privacy information and disclosures.';
+    const keywords = page?.meta_keywords ? page.meta_keywords.split(',').map(k=>k.trim()).filter(Boolean) : undefined;
+    return { title, description, keywords, openGraph: { title, description }, twitter: { title, description } };
+  } catch (e) {
+    return { title: 'California Privacy Policy', description: 'California privacy information and disclosures.' };
+  }
+}
 
 const CaliforniaPage = () => {
   return (

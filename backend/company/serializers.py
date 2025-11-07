@@ -43,6 +43,9 @@ class CompanyReviewSerializer(serializers.ModelSerializer):
             "content",
             "rating",
             "author_name",
+            "meta_title",
+            "meta_description",
+            "meta_keywords",
             "is_published",
             "published_at",
         ]

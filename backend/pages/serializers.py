@@ -6,7 +6,7 @@ class StaticPageSerializer(serializers.ModelSerializer):
     class Meta:
         model = StaticPage
         fields = [
-            'id', 'page_type', 'title', 'menu_label', 'nav_group', 'meta_description', 'content',
+            'id', 'page_type', 'title', 'menu_label', 'nav_group', 'meta_title', 'meta_description', 'meta_keywords', 'content',
             'show_in_navbar', 'nav_order', 'show_in_footer', 'footer_order',
             'updated_at'
         ]
@@ -65,7 +65,7 @@ class CarInsuranceQuotesPageSerializer(serializers.ModelSerializer):
     class Meta:
         model = CarInsuranceQuotesPage
         fields = [
-            'id', 'title', 'last_updated', 'intro_paragraphs', 'takeaways',
-            'state_insurance_data', 'faqs', 'author_name', 'author_bio', 'author_image_url',
-            'updated_at'
+            'id', 'title', 'last_updated', 'meta_title', 'meta_description', 'meta_keywords', 'intro_paragraphs', 'takeaways',
+            'state_insurance_data', 'faqs', 'body_html', 'toc_items', 'video_url',
+            'author_name', 'author_bio', 'author_image', 'author_context', 'updated_at'
         ]

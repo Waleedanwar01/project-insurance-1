@@ -30,15 +30,20 @@ export async function generateMetadata({ params }) {
     }
     
     const post = await res.json();
-    
-    // Use the actual blog title from API
+
+    const title = post.meta_title || post.title || slug;
+    const description = post.meta_description || post.summary || `Read ${slug} on Insurance Blog.`;
+    const images = post.feature_image ? [{ url: post.feature_image }] : [];
+    const keywords = post.meta_keywords ? post.meta_keywords.split(',').map(k => k.trim()).filter(Boolean) : undefined;
+
     return {
-      title: `${post.title || slug} | Insurance Blog`,
-      description: post.summary || `Read ${slug} on Insurance Blog.`,
+      title: `${title} | Insurance Blog` ,
+      description,
+      keywords,
       openGraph: {
-        title: post.title || slug,
-        description: post.summary || `Read ${slug} on Insurance Blog.`,
-        images: post.feature_image ? [{ url: post.feature_image }] : [],
+        title,
+        description,
+        images,
       },
     };
   } catch (error) {

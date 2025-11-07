@@ -50,6 +50,14 @@ class FAQ(models.Model):
     helpful_count = models.PositiveIntegerField(default=0)
     not_helpful_count = models.PositiveIntegerField(default=0)
     order = models.PositiveIntegerField(default=0, help_text="Order within category")
+    # Author bio fields (optional per FAQ)
+    author_name = models.CharField(max_length=100, blank=True)
+    author_bio = models.TextField(blank=True)
+    author_image = models.ImageField(upload_to='authors/', blank=True)
+    # SEO metadata
+    meta_title = models.CharField(max_length=255, blank=True)
+    meta_description = models.TextField(blank=True)
+    meta_keywords = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -8,7 +8,10 @@ class StaticPage(models.Model):
     # Note: Removing choices does not change the database schema and allows free text entry
     page_type = models.CharField(max_length=50, unique=True)
     title = models.CharField(max_length=200)
+    # SEO metadata
+    meta_title = models.CharField(max_length=200, blank=True)
     meta_description = models.TextField(max_length=300, blank=True)
+    meta_keywords = models.CharField(max_length=255, blank=True)
     content = RichTextField()
     is_active = models.BooleanField(default=True)
     # Menu display controls
@@ -147,6 +150,10 @@ class CompanyInfo(models.Model):
 class CarInsuranceQuotesPage(models.Model):
     title = models.CharField(max_length=200, default='Car Insurance Quotes')
     last_updated = models.DateField(blank=True, null=True)
+    # SEO metadata
+    meta_title = models.CharField(max_length=200, blank=True)
+    meta_description = models.TextField(max_length=300, blank=True)
+    meta_keywords = models.CharField(max_length=255, blank=True)
 
     # Structured content blocks
     intro_paragraphs = models.JSONField(default=list, blank=True)
@@ -154,10 +161,22 @@ class CarInsuranceQuotesPage(models.Model):
     state_insurance_data = models.JSONField(default=list, blank=True)
     faqs = models.JSONField(default=list, blank=True)
 
+    # Full rich content and extras
+    body_html = RichTextField(blank=True)
+    toc_items = models.JSONField(default=list, blank=True)
+    video_url = models.URLField(blank=True)
+
     # Author section
+    AUTHOR_CONTEXT_CHOICES = [
+        ('detail', 'Detail Page'),
+        ('blog', 'Blog'),
+        ('faq', 'FAQ'),
+        ('content', 'Content Page'),
+    ]
     author_name = models.CharField(max_length=100, blank=True)
     author_bio = models.TextField(blank=True)
-    author_image_url = models.URLField(blank=True)
+    author_image = models.ImageField(upload_to='authors/', blank=True)
+    author_context = models.CharField(max_length=20, choices=AUTHOR_CONTEXT_CHOICES, default='detail')
 
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)

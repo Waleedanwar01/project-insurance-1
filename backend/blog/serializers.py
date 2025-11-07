@@ -16,16 +16,21 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class BlogPostListSerializer(serializers.ModelSerializer):
     feature_image = serializers.ImageField()
+    author_image = serializers.ImageField(required=False, allow_null=True)
     author = serializers.StringRelatedField()
     category = CategorySerializer()
 
     class Meta:
         model = BlogPost
-        fields = ('id', 'title', 'slug', 'summary', 'feature_image', 'published_at', 'author', 'category', 'views', 'helpful_count', 'not_helpful_count')
+        fields = (
+            'id', 'title', 'slug', 'summary', 'feature_image', 'published_at', 'author', 'category',
+            'views', 'helpful_count', 'not_helpful_count', 'author_name', 'author_bio', 'author_image'
+        )
 
 class BlogPostDetailSerializer(serializers.ModelSerializer):
     feature_image = serializers.ImageField()
     additional_images = BlogImageSerializer(many=True)
+    author_image = serializers.ImageField(required=False, allow_null=True)
     author = serializers.StringRelatedField()
     category = CategorySerializer()
 

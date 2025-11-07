@@ -44,7 +44,7 @@ export async function generateMetadata({ params }) {
   const faq = await fetchFaq(params.slug);
   if (!faq) return { title: "FAQ | Insurance Panda" };
   return {
-    title: `${faq.question} | Insurance Panda`,
+    title: { absolute: faq.question },
     description: faq.short_answer || "Detailed answer from Insurance Panda FAQs",
   };
 }

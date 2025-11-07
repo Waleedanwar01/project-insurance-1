@@ -44,6 +44,10 @@ class CompanyReview(models.Model):
     content = models.TextField()
     rating = models.IntegerField(null=True, blank=True, validators=[MinValueValidator(1), MaxValueValidator(5)])
     author_name = models.CharField(max_length=255, blank=True)
+    # SEO metadata
+    meta_title = models.CharField(max_length=255, blank=True)
+    meta_description = models.TextField(blank=True)
+    meta_keywords = models.CharField(max_length=255, blank=True)
     is_published = models.BooleanField(default=True)
     published_at = models.DateTimeField(default=timezone.now)
 

@@ -120,6 +120,16 @@ const renderContent = (content) => {
   return processedContent;
 };
 
+// Helper to construct absolute URLs for media (robust to missing "/media/")
+const getImageUrl = (url) => {
+  if (!url || typeof url !== 'string') return null;
+  if (/^https?:\/\//i.test(url)) return url;
+  if (url.startsWith('/')) return `${API_BASE_URL}${url}`;
+  const hasMediaPrefix = url.startsWith('media/') || url.includes('/media/');
+  const normalizedPath = hasMediaPrefix ? url.replace(/^media\//, '') : `media/${url}`;
+  return `${API_BASE_URL}/${normalizedPath}`;
+};
+
 const BlogDetailClient = ({ state, slug }) => {
   const [post, setPost] = useState(null);
   const [related, setRelated] = useState([]);
@@ -293,6 +303,30 @@ const BlogDetailClient = ({ state, slug }) => {
             }}
           />
         </div>
+
+        {/* Author Bio */}
+        {(post?.author_name || post?.author_bio || post?.author_image || post?.author) && (
+          <div className="bg-white rounded-2xl shadow-xl p-8 mb-12 border border-gray-100">
+            <div className="flex items-start gap-6">
+              {post?.author_image && (
+                <Image
+                  src={getImageUrl(post.author_image)}
+                  alt={post?.author_name || post?.author?.name || post?.author?.username || 'Author'}
+                  width={96}
+                  height={96}
+                  className="w-24 h-24 rounded-full object-cover border border-gray-200"
+                  unoptimized
+                />
+              )}
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-gray-900 mb-2">About the Author</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  {post?.author_bio || `Written by ${post?.author_name || (typeof post?.author === 'string' ? post.author : post?.author?.name || post?.author?.username) || 'Insurance Panda Editorial Team'}.`}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Attachments */}
         {post.attachments && (

@@ -31,8 +31,16 @@ export async function generateMetadata({ params }) {
   if (!slug) return { title: "FAQ | Insurance Panda" };
   const faq = await fetchFaq(slug);
   if (!faq) return { title: "FAQ | Insurance Panda" };
+  const title = faq.meta_title || faq.question;
+  const description = faq.meta_description || faq.short_answer || "Detailed answer from Insurance Panda FAQs";
+  const keywords = faq.meta_keywords ? faq.meta_keywords.split(',').map(k => k.trim()).filter(Boolean) : undefined;
   return {
-    title: `${faq.question} | Insurance Panda`,
-    description: faq.short_answer || "Detailed answer from Insurance Panda FAQs",
+    title: { absolute: title },
+    description,
+    keywords,
+    openGraph: {
+      title,
+      description,
+    },
   };
 }

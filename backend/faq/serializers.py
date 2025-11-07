@@ -24,6 +24,8 @@ class FAQListSerializer(serializers.ModelSerializer):
             'id', 'question', 'slug', 'short_answer', 'category', 
             'priority', 'tags_list', 'is_featured', 'views', 
             'helpful_count', 'not_helpful_count', 'helpfulness_percentage',
+            'author_name', 'author_bio', 'author_image',
+            'meta_title', 'meta_description', 'meta_keywords',
             'created_at', 'updated_at'
         )
 
@@ -45,6 +47,8 @@ class FAQDetailSerializer(serializers.ModelSerializer):
             'id', 'question', 'slug', 'answer', 'short_answer', 
             'category', 'priority', 'tags_list', 'is_featured', 
             'views', 'helpful_count', 'not_helpful_count', 
+            'author_name', 'author_bio', 'author_image',
+            'meta_title', 'meta_description', 'meta_keywords',
             'helpfulness_percentage', 'created_at', 'updated_at'
         )
 
