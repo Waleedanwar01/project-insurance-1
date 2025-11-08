@@ -23,6 +23,8 @@ def get_all_static_pages(request):
 
 def _page_url(page_type: str) -> str:
     mapping = {
+        # Company/info pages
+        'home': '/',
         'about': '/about',
         'contact': '/contact',
         'privacy': '/privacy',
@@ -31,6 +33,27 @@ def _page_url(page_type: str) -> str:
         'disclosure': '/disclosure',
         'team': '/team',
         'how_to_use': '/how-to-use',
+
+        # Guide and content hubs
+        'insurance-guide': '/insurance-guide',
+
+        # Feature pages
+        'car-insurance-quotes': '/car-insurance-quotes',
+        'car-insurance-comparison': '/car-insurance-comparison',
+        'car-insurance-calculator': '/car-insurance-calculator',
+        'monthly-car-insurance': '/monthly-car-insurance',
+
+        # Companies & reviews
+        'car-insurance-companies': '/car-insurance-companies',
+        'insurance-company-reviews': '/insurance-company-reviews',
+
+        # Taxonomy pages
+        'auto-insurance-types': '/auto-insurance-types',
+        'states': '/states',
+        'faqs': '/faqs',
+        'blog': '/blog',
+
+        # Other
         'high_risk_auto_insurance': '/high-risk-auto-insurance',
     }
     # For admin-typed pages without predefined routes, use generic /pages/<page_type>
@@ -39,12 +62,21 @@ def _page_url(page_type: str) -> str:
 
 @api_view(['GET'])
 def get_navbar_pages(request):
-    """List active static pages configured to show in navbar"""
-    pages = StaticPage.objects.filter(is_active=True, show_in_navbar=True).order_by('nav_order', 'title')
+    """Return ONLY company/info pages for the extra dropdown.
+    Frontend already renders Insurance Guide and other static items,
+    so we avoid duplicates and provide a single dropdown group.
+    """
+    company_types = {
+        'about', 'contact', 'privacy', 'terms', 'california_privacy', 'disclosure', 'team', 'how_to_use'
+    }
+    pages = StaticPage.objects.filter(
+        is_active=True, show_in_navbar=True, page_type__in=company_types
+    ).order_by('nav_order', 'title')
+
     data = [{
         'title': p.title,
         'label': p.menu_label or p.title,
-        'group': p.nav_group or 'Company',
+        'group': (p.nav_group or 'Company'),
         'page_type': p.page_type,
         'url': _page_url(p.page_type)
     } for p in pages]

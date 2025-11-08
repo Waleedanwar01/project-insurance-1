@@ -34,12 +34,36 @@ class StaticPage(models.Model):
         # With free-text page_type, display the title or the raw page_type
         return self.title or self.page_type
 
+
+class GuideMenuPage(StaticPage):
+    """Proxy model for managing 'Insurance Guide' dropdown items in admin."""
+    class Meta:
+        proxy = True
+        verbose_name = 'Insurance Guide Menu Page'
+        verbose_name_plural = 'Insurance Guide Menu Pages'
+
 # Proxy model to provide a dedicated admin menu for Footer "Company" items
 class FooterMenuPage(StaticPage):
     class Meta:
         proxy = True
         verbose_name = "Company Menu Page"
         verbose_name_plural = "Company Menu Pages"
+
+
+# Proxy model to manage all pages currently shown in the navbar
+class NavbarMenuPage(StaticPage):
+    class Meta:
+        proxy = True
+        verbose_name = 'Navbar Menu Page'
+        verbose_name_plural = 'Navbar Menu Pages'
+
+
+# Proxy model to manage core site pages (edit SEO only, not content)
+class CoreSitePage(StaticPage):
+    class Meta:
+        proxy = True
+        verbose_name = 'Website Page (SEO)'
+        verbose_name_plural = 'Website Pages (SEO)'
 
 
 class TeamMember(models.Model):
