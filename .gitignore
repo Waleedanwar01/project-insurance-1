@@ -25,6 +25,10 @@ insurance/out/
 insurance/build/
 insurance/*.log
 
+# Remove preview app and any nested Node artifacts
+insurance_preview/**
+**/node_modules/
+
 # OS junk
 .DS_Store
 Thumbs.db
